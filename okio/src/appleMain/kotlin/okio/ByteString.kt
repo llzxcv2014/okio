@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Square, Inc.
+ * Copyright (C) 2020 Square, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,16 @@
  */
 package okio
 
-actual fun Source.buffer(): BufferedSource = RealBufferedSource(this)
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.usePinned
+import platform.Foundation.NSData
+import platform.posix.memcpy
 
-actual fun Sink.buffer(): BufferedSink = RealBufferedSink(this)
-
-actual fun blackholeSink(): Sink = BlackholeSink()
+fun NSData.toByteString(): ByteString {
+  val data = this
+  return ByteString(ByteArray(data.length.toInt()).apply {
+    usePinned { pinned ->
+      memcpy(pinned.addressOf(0), data.bytes, data.length)
+    }
+  })
+}

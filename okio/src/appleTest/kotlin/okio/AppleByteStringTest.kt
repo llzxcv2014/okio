@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Square, Inc.
+ * Copyright (C) 2020 Square, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,17 @@
  */
 package okio
 
-actual fun Source.buffer(): BufferedSource = RealBufferedSource(this)
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import platform.Foundation.NSData
+import platform.Foundation.NSString
+import platform.Foundation.NSUTF8StringEncoding
+import platform.Foundation.dataUsingEncoding
 
-actual fun Sink.buffer(): BufferedSink = RealBufferedSink(this)
-
-actual fun blackholeSink(): Sink = BlackholeSink()
+class AppleByteStringTest {
+  @Test fun nsDataToByteString() {
+    val data = ("Hello" as NSString).dataUsingEncoding(NSUTF8StringEncoding) as NSData
+    val byteString = data.toByteString()
+    assertEquals("Hello", byteString.utf8())
+  }
+}
